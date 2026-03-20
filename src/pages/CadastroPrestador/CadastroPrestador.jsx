@@ -1,72 +1,85 @@
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { createPrestador } from "../../services/storage"
 import "./CadastroPrestador.css"
 
+const TIPOS = [
+  "Mecânico",
+  "Borracheiro",
+  "Bateria",
+  "Guincho",
+  "Troca de Óleo",
+  "Auto Elétrica",
+  "Chaveiro",
+  "Ar Condicionado"
+]
+
 export default function CadastroPrestador() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState({
+    nome: "",
+    telefone: "",
+    tipo: TIPOS[0],
+    cidade: ""
+  })
 
-  function handleSubmit(e){
+  function handleChange(e) {
+    setForm({ ...form, [e.target.id]: e.target.value })
+  }
+
+  function handleSubmit(e) {
     e.preventDefault()
-
-    const nome = document.getElementById("nome").value
-    const telefone = document.getElementById("telefone").value
-    const tipo = document.getElementById("tipo").value
-    const cidade = document.getElementById("cidade").value
-
-    const novoPrestador = {
-      nome,
-      telefone,
-      tipo,
-      cidade
-    }
-
-    // pegar lista existente
-    const lista = JSON.parse(localStorage.getItem("prestadores")) || []
-
-    // adicionar novo
-    lista.push(novoPrestador)
-
-    // salvar novamente
-    localStorage.setItem("prestadores", JSON.stringify(lista))
+    createPrestador(form)
 
     alert("Prestador cadastrado com sucesso!")
 
-    // limpar campos
-    document.getElementById("nome").value = ""
-    document.getElementById("telefone").value = ""
-    document.getElementById("cidade").value = ""
+    setForm({
+      nome: "",
+      telefone: "",
+      tipo: TIPOS[0],
+      cidade: ""
+    })
+
+    navigate("/admin")
   }
 
   return (
-
     <div className="cadastro">
-
       <h1>Cadastrar Prestador</h1>
 
       <form onSubmit={handleSubmit}>
+        <input
+          id="nome"
+          placeholder="Nome do profissional"
+          value={form.nome}
+          onChange={handleChange}
+          required
+        />
 
-        <input id="nome" placeholder="Nome do profissional" />
+        <input
+          id="telefone"
+          placeholder="Telefone / WhatsApp"
+          value={form.telefone}
+          onChange={handleChange}
+          required
+        />
 
-        <input id="telefone" placeholder="Telefone / WhatsApp" />
-
-        <select id="tipo">
-          <option>Tipo de serviço</option>
-          <option>Mecânico</option>
-          <option>Borracheiro</option>
-          <option>Bateria</option>
-          <option>Guincho</option>
-          <option>Troca de Óleo</option>
-          <option>Auto Elétrica</option>
-          <option>Chaveiro</option>
-          <option>Ar Condicionado</option>
+        <select id="tipo" value={form.tipo} onChange={handleChange}>
+          {TIPOS.map((tipo) => (
+            <option key={tipo}>{tipo}</option>
+          ))}
         </select>
 
-        <input id="cidade" placeholder="Cidade" />
+        <input
+          id="cidade"
+          placeholder="Cidade"
+          value={form.cidade}
+          onChange={handleChange}
+          required
+        />
 
-        <button type="submit">
-          Cadastrar
-        </button>
-
+        <button type="submit">Cadastrar</button>
       </form>
-
     </div>
-
   )
 }

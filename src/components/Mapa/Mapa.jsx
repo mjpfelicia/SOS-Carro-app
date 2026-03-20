@@ -1,8 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet"
 
 export default function Mapa({ center, prestadores }) {
-
-  // 🛑 proteção contra erro
   if (!center || !center.lat) {
     return <p>Carregando mapa...</p>
   }
@@ -13,24 +11,19 @@ export default function Mapa({ center, prestadores }) {
       zoom={13}
       style={{ width: "100%", height: "300px" }}
     >
-
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {prestadores.map((p, i) => {
-
-        const lat = center.lat + (Math.random() * 0.02)
-        const lng = center.lng + (Math.random() * 0.02)
-
-        return (
-          <Marker key={i} position={[lat, lng]}>
-            <Popup>
-              <strong>{p.nome}</strong><br/>
-              {p.tipo}
-            </Popup>
-          </Marker>
-        )
-      })}
-
+      {prestadores.map((prestador) => (
+        <Marker key={prestador.id} position={[prestador.lat, prestador.lng]}>
+          <Popup>
+            <strong>{prestador.nome}</strong>
+            <br />
+            {prestador.tipo}
+            <br />
+            {prestador.cidade}
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   )
 }

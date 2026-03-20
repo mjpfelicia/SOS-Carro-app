@@ -36,3 +36,10 @@ cursor:pointer;
 margin-top:15px;
 color:#777;
 }
+
+.feedbackError{
+margin-top:14px;
+color:#c62828;
+font-size:14px;
+font-weight:bold;
+}
