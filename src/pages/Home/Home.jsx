@@ -9,6 +9,7 @@ import {
   getPrestadores,
   getResumoAvaliacao,
   getUsuarioAtual,
+  isAdmin,
   registrarAvaliacao,
   registrarChamado,
   toggleFavorito
@@ -67,6 +68,7 @@ export default function Home() {
   })
   const [avaliacoes, setAvaliacoes] = useState({})
   const [formAvaliacoes, setFormAvaliacoes] = useState({})
+  const usuarioAdmin = isAdmin(usuarioAtual)
 
   function carregarDados() {
     setPrestadores(getPrestadores())
@@ -255,7 +257,7 @@ export default function Home() {
       </div>
 
       <div className="quickLinks">
-        {LINKS_RAPIDOS.map((link) => (
+        {LINKS_RAPIDOS.filter((link) => usuarioAdmin || link.rota !== "/admin").map((link) => (
           <button key={link.rota} onClick={() => navigate(link.rota)}>
             <span>{link.icone}</span>
             <span>{link.label}</span>
@@ -414,8 +416,15 @@ export default function Home() {
 
       {openMenu && (
         <div className="popupMenu">
-          <button onClick={() => navigate("/cadastro-prestador")}>➕ Cadastrar prestador</button>
-          <button onClick={() => navigate("/admin")}>🛠️ Painel administrativo</button>
+          {usuarioAdmin && (
+            <>
+              <button onClick={() => navigate("/cadastro-prestador")}>
+                ➕ Cadastrar prestador
+              </button>
+              <button onClick={() => navigate("/admin")}>🛠️ Painel administrativo</button>
+            </>
+          )}
+          {!usuarioAdmin && <button onClick={() => navigate("/perfil")}>👤 Ver perfil</button>}
         </div>
       )}
 

@@ -59,6 +59,10 @@ export default function Login() {
           Cadastre-se
         </span>
       </div>
+
+      <p className="register">
+        Admin de teste: <strong>admin@soscarro.com</strong> / <strong>admin123</strong>
+      </p>
     </div>
   )
 }

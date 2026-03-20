@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import "leaflet/dist/leaflet.css"
 
 import Home from "./pages/Home/Home.jsx"
@@ -9,6 +9,17 @@ import Favoritos from "./pages/Favoritos.jsx"
 import Historico from "./pages/Historico.jsx"
 import AdminPrestadores from "./pages/AdminPrestadores.jsx"
 import Profile from "./pages/Profile.jsx"
+import { getUsuarioAtual, isAdmin } from "./services/storage.js"
+
+function AdminRoute({ children }) {
+  const usuario = getUsuarioAtual()
+
+  if (!isAdmin(usuario)) {
+    return <Navigate to="/" replace />
+  }
+
+  return children
+}
 
 function App() {
   return (
@@ -17,10 +28,24 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro-cliente" element={<CadastroCliente />} />
-        <Route path="/cadastro-prestador" element={<CadastroPrestador />} />
+        <Route
+          path="/cadastro-prestador"
+          element={
+            <AdminRoute>
+              <CadastroPrestador />
+            </AdminRoute>
+          }
+        />
         <Route path="/favoritos" element={<Favoritos />} />
         <Route path="/historico" element={<Historico />} />
-        <Route path="/admin" element={<AdminPrestadores />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPrestadores />
+            </AdminRoute>
+          }
+        />
         <Route path="/perfil" element={<Profile />} />
       </Routes>
     </BrowserRouter>

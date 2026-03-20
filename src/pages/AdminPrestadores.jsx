@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import {
   getPrestadores,
   getResumoAvaliacao,
+  getUsuarioAtual,
+  isAdmin,
   removePrestador,
   updatePrestador
 } from "../services/storage"
@@ -12,14 +14,20 @@ export default function AdminPrestadores() {
   const navigate = useNavigate()
   const [prestadores, setPrestadores] = useState([])
   const [edicao, setEdicao] = useState({})
+  const usuario = getUsuarioAtual()
 
   function carregar() {
     setPrestadores(getPrestadores())
   }
 
   useEffect(() => {
+    if (!isAdmin(usuario)) {
+      navigate("/", { replace: true })
+      return
+    }
+
     carregar()
-  }, [])
+  }, [navigate, usuario])
 
   function iniciarEdicao(prestador) {
     setEdicao((current) => ({
@@ -59,6 +67,7 @@ export default function AdminPrestadores() {
         <div>
           <h1>Painel Administrativo</h1>
           <p>Gerencie os prestadores cadastrados, edite dados e acompanhe reputacao.</p>
+          <small>Acesso restrito ao administrador do aplicativo.</small>
         </div>
 
         <div className="dashboardActions">

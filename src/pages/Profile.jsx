@@ -38,6 +38,7 @@ export default function Profile() {
             <>
               <p>{usuario.nome}</p>
               <small>{usuario.email}</small>
+              <small>Perfil: {usuario.role === "admin" ? "Administrador" : "Cliente"}</small>
             </>
           ) : (
             <p>Nenhum usuario autenticado. O app esta em modo visitante.</p>

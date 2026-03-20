@@ -7,6 +7,14 @@ const KEYS = {
   avaliacoesPorPrestador: "avaliacoesPorPrestador"
 }
 
+const ADMIN_PADRAO = {
+  id: "usuario-admin-sos-carro",
+  nome: "Administrador SOS Carro",
+  email: "admin@soscarro.com",
+  senha: "admin123",
+  role: "admin"
+}
+
 const PRESTADORES_INICIAIS = [
   {
     id: "prestador-mecanico-centro",
@@ -129,7 +137,18 @@ export function removePrestador(prestadorId) {
 }
 
 export function getUsuarios() {
-  return read(KEYS.usuarios, [])
+  const usuarios = read(KEYS.usuarios, [])
+
+  if (!usuarios.some((usuario) => usuario.email === ADMIN_PADRAO.email)) {
+    const atualizados = [...usuarios, ADMIN_PADRAO]
+    write(KEYS.usuarios, atualizados)
+    return atualizados
+  }
+
+  return usuarios.map((usuario) => ({
+    ...usuario,
+    role: usuario.role || (usuario.email === ADMIN_PADRAO.email ? "admin" : "cliente")
+  }))
 }
 
 export function createUsuario(data) {
@@ -138,7 +157,8 @@ export function createUsuario(data) {
     id: `usuario-${slugify(data.email)}-${Date.now()}`,
     nome: data.nome,
     email: data.email,
-    senha: data.senha
+    senha: data.senha,
+    role: "cliente"
   }
 
   write(KEYS.usuarios, [...usuarios, novoUsuario])
@@ -162,7 +182,16 @@ export function setUsuarioAtual(usuario) {
 }
 
 export function getUsuarioAtual() {
-  return read(KEYS.usuarioAtual, null)
+  const usuario = read(KEYS.usuarioAtual, null)
+
+  if (!usuario) {
+    return null
+  }
+
+  return {
+    ...usuario,
+    role: usuario.role || (usuario.email === ADMIN_PADRAO.email ? "admin" : "cliente")
+  }
 }
 
 export function logoutUsuario() {
@@ -266,4 +295,8 @@ export function formatarData(dateString) {
     hour: "2-digit",
     minute: "2-digit"
   })
+}
+
+export function isAdmin(usuario = getUsuarioAtual()) {
+  return usuario?.role === "admin"
 }
