@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import EmergencyButton from "../../components/EmergencyButton"
 import Mapa from "../../components/Mapa/Mapa"
 import {
   formatarData,
@@ -28,10 +29,10 @@ const TIPOS_SERVICO = [
 ]
 
 const LINKS_RAPIDOS = [
-  { label: "Favoritos", icone: "❤️", rota: "/favoritos" },
-  { label: "Histórico", icone: "🧾", rota: "/historico" },
-  { label: "Painel", icone: "🛠️", rota: "/admin" },
-  { label: "Perfil", icone: "👤", rota: "/perfil" }
+  { label: "❤️ Favoritos", rota: "/favoritos" },
+  { label: "🧾 Historico", rota: "/historico" },
+  { label: "🛠️ Painel", rota: "/admin" },
+  { label: "👤 Perfil", rota: "/perfil" }
 ]
 
 function normalizarTexto(value) {
@@ -61,7 +62,7 @@ export default function Home() {
   const [historico, setHistorico] = useState([])
   const [usuarioAtual, setUsuarioAtual] = useState(null)
   const [busca, setBusca] = useState("")
-  const [local, setLocal] = useState("São Paulo - SP")
+  const [local, setLocal] = useState("Sao Paulo - SP")
   const [coords, setCoords] = useState({
     lat: -23.5505,
     lng: -46.6333
@@ -96,7 +97,7 @@ export default function Home() {
   }, [])
 
   function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371
+    const raio = 6371
     const dLat = ((lat2 - lat1) * Math.PI) / 180
     const dLon = ((lon2 - lon1) * Math.PI) / 180
 
@@ -108,7 +109,7 @@ export default function Home() {
         Math.sin(dLon / 2)
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return Number((R * c).toFixed(1))
+    return Number((raio * c).toFixed(1))
   }
 
   async function buscarLocal() {
@@ -163,7 +164,9 @@ export default function Home() {
     })
 
     if (filtro !== "Todos") {
-      lista = lista.filter((prestador) => prestador.tipo === filtro)
+      lista = lista.filter((prestador) => {
+        return normalizarTexto(prestador.tipo) === normalizarTexto(filtro)
+      })
     }
 
     if (termo) {
@@ -174,7 +177,7 @@ export default function Home() {
     }
 
     return lista.sort((a, b) => a.distancia - b.distancia)
-  }, [busca, coords, filtro, prestadores, favoritos, avaliacoes])
+  }, [avaliacoes, busca, coords, favoritos, filtro, prestadores])
 
   function selecionar(tipo) {
     setFiltro(filtro === tipo ? "Todos" : tipo)
@@ -185,16 +188,18 @@ export default function Home() {
     setFavoritos(atualizados)
   }
 
-  function handleRegistrarChamado(prestador) {
-    registrarChamado(prestador)
-    setHistorico(getChamados())
+  function abrirWhatsapp(prestador, mensagem) {
     window.open(
-      `https://wa.me/55${prestador.telefone}?text=${encodeURIComponent(
-        `Ola, preciso de ${prestador.tipo} em ${local}.`
-      )}`,
+      `https://wa.me/55${prestador.telefone}?text=${encodeURIComponent(mensagem)}`,
       "_blank",
       "noopener,noreferrer"
     )
+  }
+
+  function handleRegistrarChamado(prestador, mensagem = null) {
+    registrarChamado(prestador)
+    setHistorico(getChamados())
+    abrirWhatsapp(prestador, mensagem || `Ola, preciso de ${prestador.tipo} em ${local}.`)
   }
 
   function handleFormAvaliacao(prestadorId, campo, valor) {
@@ -242,7 +247,7 @@ export default function Home() {
 
       <div className="welcomePanel">
         <div>
-          <strong>{usuarioAtual ? `Ola, ${usuarioAtual.nome}` : "Modo visitante"}</strong>
+          <strong>{usuarioAtual ? `👋 Ola, ${usuarioAtual.nome}` : "👀 Modo visitante"}</strong>
           <p>
             {usuarioAtual
               ? "Seus favoritos, historico e avaliacoes ficam salvos neste navegador."
@@ -259,7 +264,6 @@ export default function Home() {
       <div className="quickLinks">
         {LINKS_RAPIDOS.filter((link) => usuarioAdmin || link.rota !== "/admin").map((link) => (
           <button key={link.rota} onClick={() => navigate(link.rota)}>
-            <span>{link.icone}</span>
             <span>{link.label}</span>
           </button>
         ))}
@@ -275,7 +279,9 @@ export default function Home() {
         <button onClick={buscarLocal}>🔎 Buscar</button>
       </div>
 
-      <h3 className="sectionTitle">Servicos Rapidos</h3>
+      <EmergencyButton />
+
+      <h3 className="sectionTitle">⚡ Servicos Rapidos</h3>
 
       <div className="services">
         {TIPOS_SERVICO.map((tipo) => (
@@ -290,7 +296,7 @@ export default function Home() {
         ))}
       </div>
 
-      <h3 className="sectionTitle">Profissionais Proximos</h3>
+      <h3 className="sectionTitle">📍 Profissionais Proximos</h3>
 
       <div className="professionalsGrid">
         {prestadoresComContexto.length === 0 ? (
@@ -309,7 +315,7 @@ export default function Home() {
                     <div>
                       <h4>{prestador.nome}</h4>
                       <p>
-                        {prestador.tipo} • {prestador.cidade} • {prestador.distancia} km
+                        {prestador.tipo} - {prestador.cidade} - {prestador.distancia} km
                       </p>
                     </div>
 
@@ -318,8 +324,7 @@ export default function Home() {
                       className={`favoriteButton ${prestador.favorito ? "active" : ""}`}
                       onClick={() => handleToggleFavorito(prestador.id)}
                     >
-                      <span>{prestador.favorito ? "❤️" : "🤍"}</span>
-                      <span>{prestador.favorito ? "Salvo" : "Favoritar"}</span>
+                      <span>{prestador.favorito ? "❤️ Salvo" : "🤍 Favoritar"}</span>
                     </button>
                   </div>
 
@@ -381,7 +386,7 @@ export default function Home() {
                   />
 
                   <button type="button" onClick={() => handleEnviarAvaliacao(prestador.id)}>
-                    Enviar
+                    📩 Enviar
                   </button>
                 </div>
 
@@ -392,7 +397,7 @@ export default function Home() {
                     prestador.avaliacoesRecentes.map((avaliacao) => (
                       <div key={avaliacao.id} className="reviewItem">
                         <strong>
-                          {avaliacao.usuario} • {avaliacao.nota}/5
+                          {avaliacao.usuario} - {avaliacao.nota}/5
                         </strong>
                         <p>{avaliacao.comentario}</p>
                         <span>{formatarData(avaliacao.data)}</span>
@@ -406,10 +411,6 @@ export default function Home() {
         )}
       </div>
 
-      <button className="emergency" onClick={() => navigate("/historico")}>
-        🚨 Ver historico de chamados
-      </button>
-
       <div className="mapa">
         <Mapa prestadores={prestadoresComContexto} center={coords} />
       </div>
@@ -418,9 +419,7 @@ export default function Home() {
         <div className="popupMenu">
           {usuarioAdmin && (
             <>
-              <button onClick={() => navigate("/cadastro-prestador")}>
-                ➕ Cadastrar prestador
-              </button>
+              <button onClick={() => navigate("/cadastro-prestador")}>➕ Cadastrar prestador</button>
               <button onClick={() => navigate("/admin")}>🛠️ Painel administrativo</button>
             </>
           )}

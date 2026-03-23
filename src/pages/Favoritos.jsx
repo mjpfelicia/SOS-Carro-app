@@ -21,7 +21,9 @@ export default function Favoritos() {
           <p>Prestadores salvos para acesso rapido neste usuario.</p>
         </div>
         <div className="dashboardActions">
-          <button onClick={() => navigate("/")}>Voltar para home</button>
+          <button className="homeBackButton" onClick={() => navigate("/")}>
+            🏠 Voltar para home
+          </button>
         </div>
       </div>
 

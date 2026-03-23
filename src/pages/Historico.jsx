@@ -14,7 +14,9 @@ export default function Historico() {
           <p>Registro local das solicitacoes feitas para prestadores.</p>
         </div>
         <div className="dashboardActions">
-          <button onClick={() => navigate("/")}>Voltar para home</button>
+          <button className="homeBackButton" onClick={() => navigate("/")}>
+            🏠 Voltar para home
+          </button>
         </div>
       </div>
 

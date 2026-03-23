@@ -1,0 +1,245 @@
+.socorroPage {
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top right, rgba(217, 79, 61, 0.12), transparent 22%),
+    linear-gradient(180deg, #fbf7f3 0%, #f4f1ea 100%);
+  font-family: Arial, sans-serif;
+  color: #213547;
+}
+
+.socorroHero,
+.socorroGrid,
+.socorroResultados {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.socorroHero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 28px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #1f425f, #2d5d80);
+  color: white;
+  box-shadow: 0 20px 40px rgba(31, 66, 95, 0.18);
+}
+
+.socorroEyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.socorroHero h1 {
+  margin: 0 0 10px;
+  color: white;
+}
+
+.socorroHero p {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.socorroHero button,
+.socorroResultadosHeader button,
+.socorroProfissionalActions button,
+.socorroTipoCard,
+.socorroProfissionalActions a {
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.socorroHero button {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  background: white;
+  color: #1f425f;
+}
+
+.socorroHero .homeBackButton {
+  min-width: 210px;
+  box-shadow: 0 12px 24px rgba(10, 25, 41, 0.16);
+}
+
+.socorroGrid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.socorroTipoCard {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 22px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 12px 28px rgba(60, 40, 20, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.socorroTipoCard.active {
+  background: #fff1ee;
+  box-shadow: 0 18px 32px rgba(217, 79, 61, 0.14);
+}
+
+.socorroTipoCard strong {
+  font-size: 20px;
+}
+
+.socorroTipoIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1f425f, #3c7296);
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: 0 14px 24px rgba(31, 66, 95, 0.18);
+}
+
+.socorroTipoCard.active .socorroTipoIcon {
+  background: linear-gradient(135deg, #d94f3d, #f08a5d);
+}
+
+.socorroTipoCard span {
+  line-height: 1.5;
+  color: #667085;
+}
+
+.socorroResultados {
+  margin-top: 24px;
+}
+
+.socorroResultadosHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.socorroResultadosHeader h2 {
+  margin: 0 0 6px;
+}
+
+.socorroResultadosHeader p {
+  margin: 0;
+  color: #667085;
+}
+
+.socorroResultadosHeader button {
+  background: #1f425f;
+  color: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.socorroEmpty {
+  margin-top: 16px;
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba(60, 40, 20, 0.08);
+}
+
+.socorroProfissionais {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.socorroProfissionalCard {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: 0 14px 30px rgba(60, 40, 20, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.socorroProfissionalTop {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.socorroProfissionalIcon {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fff1ee, #ffe1da);
+  color: #d94f3d;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 0 0 1px rgba(217, 79, 61, 0.12);
+}
+
+.socorroProfissionalCard h3 {
+  margin: 0 0 8px;
+}
+
+.socorroProfissionalCard p,
+.socorroProfissionalCard small {
+  color: #667085;
+}
+
+.socorroProfissionalActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.socorroProfissionalActions a,
+.socorroProfissionalActions button {
+  flex: 1 1 150px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.socorroProfissionalActions a {
+  background: #25d366;
+  color: white;
+}
+
+.socorroProfissionalActions button {
+  background: #d94f3d;
+  color: white;
+}
+
+@media (max-width: 700px) {
+  .socorroPage {
+    padding: 14px;
+  }
+
+  .socorroHero,
+  .socorroResultadosHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

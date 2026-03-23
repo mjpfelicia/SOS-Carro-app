@@ -26,6 +26,9 @@ export default function Profile() {
           <p>Resumo do usuario atual e dos dados persistidos no navegador.</p>
         </div>
         <div className="dashboardActions">
+          <button className="homeBackButton" onClick={() => navigate("/")}>
+            🏠 Voltar para home
+          </button>
           {!usuario && <button onClick={() => navigate("/login")}>Entrar</button>}
           {usuario && <button onClick={sair}>Sair</button>}
         </div>

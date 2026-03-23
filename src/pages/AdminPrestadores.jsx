@@ -72,7 +72,9 @@ export default function AdminPrestadores() {
 
         <div className="dashboardActions">
           <button onClick={() => navigate("/cadastro-prestador")}>Novo prestador</button>
-          <button onClick={() => navigate("/")}>Voltar para home</button>
+          <button className="homeBackButton" onClick={() => navigate("/")}>
+            🏠 Voltar para home
+          </button>
         </div>
       </div>
 

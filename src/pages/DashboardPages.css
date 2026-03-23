@@ -42,6 +42,16 @@
   font-weight: bold;
 }
 
+.dashboardActions .homeBackButton {
+  background: #ffffff;
+  color: #1f425f;
+  box-shadow: 0 10px 24px rgba(31, 66, 95, 0.12);
+}
+
+.dashboardActions .homeBackButton:hover {
+  background: #f2f7fb;
+}
+
 .dashboardList,
 .dashboardGrid {
   display: grid;
@@ -109,6 +119,14 @@
   .dashboardHeader,
   .dashboardCardTop {
     flex-direction: column;
+  }
+
+  .dashboardActions {
+    width: 100%;
+  }
+
+  .dashboardActions button {
+    width: 100%;
   }
 
   .dashboardGrid,
