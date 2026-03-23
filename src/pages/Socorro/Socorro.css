@@ -11,9 +11,29 @@
 
 .socorroHero,
 .socorroGrid,
-.socorroResultados {
+.socorroResultados,
+.socorroPergunta {
   width: min(1180px, 100%);
   margin: 0 auto;
+}
+
+.socorroPergunta {
+  margin-top: 22px;
+}
+
+.socorroPerguntaHeader {
+  margin-bottom: 14px;
+}
+
+.socorroPerguntaHeader strong {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.socorroPerguntaHeader p {
+  margin: 0;
+  color: #667085;
 }
 
 .socorroHero {
@@ -45,6 +65,15 @@
   max-width: 620px;
   margin: 0;
   color: rgba(255, 255, 255, 0.84);
+}
+
+.socorroLocalizacao {
+  display: inline-flex;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
 }
 
 .socorroHero button,
@@ -159,6 +188,33 @@
   box-shadow: 0 12px 28px rgba(60, 40, 20, 0.08);
 }
 
+.socorroDetalhesBox {
+  margin-top: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba(60, 40, 20, 0.08);
+}
+
+.socorroDetalhesBox label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.socorroDetalhesBox textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
+  padding: 14px;
+  box-sizing: border-box;
+  font: inherit;
+  color: #213547;
+  background: #fff;
+}
+
 .socorroProfissionais {
   margin-top: 18px;
   display: grid;
@@ -174,6 +230,18 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.socorroProfissionalCard:hover {
+  transform: translateY(-2px);
+}
+
+.socorroProfissionalCard.active {
+  border-color: rgba(217, 79, 61, 0.36);
+  box-shadow: 0 20px 34px rgba(217, 79, 61, 0.14);
 }
 
 .socorroProfissionalTop {
@@ -213,6 +281,28 @@
   flex-wrap: wrap;
 }
 
+.socorroAjudaBox {
+  margin-top: 18px;
+  background: linear-gradient(135deg, #1f425f, #2d5d80);
+  color: white;
+  border-radius: 22px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  box-shadow: 0 18px 34px rgba(31, 66, 95, 0.18);
+}
+
+.socorroAjudaBox p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.socorroAjudaButton {
+  min-width: 180px;
+}
+
 .socorroProfissionalActions a,
 .socorroProfissionalActions button {
   flex: 1 1 150px;
@@ -238,7 +328,8 @@
   }
 
   .socorroHero,
-  .socorroResultadosHeader {
+  .socorroResultadosHeader,
+  .socorroAjudaBox {
     flex-direction: column;
     align-items: flex-start;
   }

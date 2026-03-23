@@ -301,15 +301,21 @@
 .professionalsGrid {
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1180px) {
+  .professionalsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .cardExpanded {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 24px;
-  padding: 16px;
+  padding: 14px;
   box-shadow: 0 18px 36px var(--color-shadow);
   min-width: 0;
 }
@@ -321,16 +327,18 @@
 }
 
 .cardHeader img {
-  width: 88px;
-  height: 88px;
+  width: 76px;
+  height: 76px;
   object-fit: cover;
-  border-radius: 20px;
+  border-radius: 18px;
   flex-shrink: 0;
 }
 
 .cardInfo {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardTitleRow {
@@ -342,40 +350,45 @@
 
 .cardInfo h4 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
 }
 
 .cardInfo p {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--color-text-muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
 .ratingRow {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  font-size: 13px;
+  width: 100%;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+  margin-top: 8px;
+  font-size: 12px;
   color: var(--color-text);
 }
 
 .ratingRow span {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 6px;
-  padding: 7px 10px;
+  gap: 5px;
+  padding: 6px 9px;
   border-radius: 999px;
   background: var(--color-surface-soft);
+  white-space: nowrap;
+  text-align: center;
 }
 
 .favoriteButton {
   background: var(--color-primary-soft);
   color: var(--color-primary);
   border-radius: 999px;
-  padding: 9px 12px;
-  font-size: 12px;
+  padding: 8px 10px;
+  font-size: 11px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -390,8 +403,8 @@
 
 .cardActions {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
@@ -401,10 +414,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
-  padding: 12px 14px;
+  border-radius: 12px;
+  padding: 10px 12px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   box-sizing: border-box;
 }
@@ -420,34 +433,34 @@
 }
 
 .reviewBox {
-  margin-top: 16px;
+  margin-top: 14px;
   border-top: 1px solid var(--color-border);
-  padding-top: 14px;
+  padding-top: 12px;
 }
 
 .reviewBox h5 {
-  margin: 0 0 10px;
-  font-size: 14px;
+  margin: 0 0 8px;
+  font-size: 13px;
 }
 
 .reviewForm {
   display: grid;
   grid-template-columns: 130px minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 6px;
 }
 
 .reviewForm select,
 .reviewForm input {
-  border-radius: 12px;
-  padding: 11px 12px;
+  border-radius: 10px;
+  padding: 10px 11px;
   box-sizing: border-box;
 }
 
 .reviewForm button {
   background: var(--color-primary);
   color: white;
-  border-radius: 12px;
-  padding: 0 16px;
+  border-radius: 10px;
+  padding: 0 14px;
   font-weight: 700;
 }
 
@@ -460,17 +473,17 @@
 
 .reviewItem {
   background: var(--color-surface-soft);
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: 14px;
+  padding: 10px;
 }
 
 .reviewItem strong {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .reviewItem p {
-  margin-top: 5px;
-  font-size: 13px;
+  margin-top: 4px;
+  font-size: 12px;
   color: var(--color-text);
 }
 
@@ -478,7 +491,7 @@
 .emptyMini,
 .emptyState {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .emptyState {
@@ -590,9 +603,10 @@
   .reviewForm {
     grid-template-columns: 1fr;
   }
+
 }
 
-@media (max-width: 640px) {
+@media (max-width: 600px) {
   .home {
     padding: 14px;
     padding-bottom: 120px;
@@ -607,12 +621,32 @@
   }
 
   .professionalsGrid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+  }
+
+  .professionalsGrid .cardExpanded {
+    min-width: 84%;
+    flex: 0 0 84%;
+    scroll-snap-align: center;
   }
 
   .cardHeader,
   .cardTitleRow {
     flex-direction: column;
+  }
+
+  .ratingRow {
+    flex-wrap: wrap;
+  }
+
+  .ratingRow span {
+    white-space: normal;
   }
 
   .cardHeader img {

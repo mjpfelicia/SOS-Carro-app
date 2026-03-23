@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import EmergencyButton from "../../components/EmergencyButton"
 import Mapa from "../../components/Mapa/Mapa"
+import PrestadorCard from "../../components/PrestadorCard"
 import {
   formatarData,
   getAvaliacoes,
@@ -18,19 +19,19 @@ import {
 import "./Home.css"
 
 const TIPOS_SERVICO = [
-  { nome: "Mecânico", icone: "🔧" },
-  { nome: "Borracheiro", icone: "🛞" },
-  { nome: "Bateria", icone: "🔋" },
   { nome: "Guincho", icone: "🚚" },
+  { nome: "Bateria", icone: "🔋" },
+  { nome: "Borracheiro", icone: "🛞" },
+  { nome: "Mecânico", icone: "🔧" },
+  { nome: "Auto Elétrica", icone: "⚡" },
   { nome: "Chaveiro", icone: "🗝️" },
   { nome: "Ar Condicionado", icone: "❄️" },
-  { nome: "Troca de Óleo", icone: "🛢️" },
-  { nome: "Auto Elétrica", icone: "⚡" }
+  { nome: "Troca de Óleo", icone: "🛢️" }
 ]
 
 const LINKS_RAPIDOS = [
   { label: "❤️ Favoritos", rota: "/favoritos" },
-  { label: "🧾 Historico", rota: "/historico" },
+  { label: "🧾 Histórico", rota: "/historico" },
   { label: "🛠️ Painel", rota: "/admin" },
   { label: "👤 Perfil", rota: "/perfil" }
 ]
@@ -164,9 +165,7 @@ export default function Home() {
     })
 
     if (filtro !== "Todos") {
-      lista = lista.filter((prestador) => {
-        return normalizarTexto(prestador.tipo) === normalizarTexto(filtro)
-      })
+      lista = lista.filter((prestador) => normalizarTexto(prestador.tipo) === normalizarTexto(filtro))
     }
 
     if (termo) {
@@ -303,110 +302,18 @@ export default function Home() {
           <p className="emptyState">Nenhum prestador encontrado.</p>
         ) : (
           prestadoresComContexto.map((prestador, index) => (
-            <article key={prestador.id} className="cardExpanded">
-              <div className="cardHeader">
-                <img
-                  alt={prestador.nome}
-                  src={`https://randomuser.me/api/portraits/men/${index + 10}.jpg`}
-                />
-
-                <div className="cardInfo">
-                  <div className="cardTitleRow">
-                    <div>
-                      <h4>{prestador.nome}</h4>
-                      <p>
-                        {prestador.tipo} - {prestador.cidade} - {prestador.distancia} km
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      className={`favoriteButton ${prestador.favorito ? "active" : ""}`}
-                      onClick={() => handleToggleFavorito(prestador.id)}
-                    >
-                      <span>{prestador.favorito ? "❤️ Salvo" : "🤍 Favoritar"}</span>
-                    </button>
-                  </div>
-
-                  <div className="ratingRow">
-                    <span>
-                      ⭐{" "}
-                      {prestador.resumoAvaliacao.total > 0
-                        ? `${prestador.resumoAvaliacao.media}/5`
-                        : "Sem avaliacoes"}
-                    </span>
-                    <span>💬 {prestador.resumoAvaliacao.total} comentarios</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="cardActions">
-                <a
-                  href={`https://wa.me/55${prestador.telefone}?text=${encodeURIComponent(
-                    `Ola, preciso de ${prestador.tipo} em ${local}.`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btnWhatsClean"
-                >
-                  💬 WhatsApp
-                </a>
-
-                <button
-                  type="button"
-                  className="requestButton"
-                  onClick={() => handleRegistrarChamado(prestador)}
-                >
-                  🚨 Registrar chamado
-                </button>
-              </div>
-
-              <div className="reviewBox">
-                <h5>⭐ Avaliar prestador</h5>
-
-                <div className="reviewForm">
-                  <select
-                    value={formAvaliacoes[prestador.id]?.nota || "5"}
-                    onChange={(e) => handleFormAvaliacao(prestador.id, "nota", e.target.value)}
-                  >
-                    <option value="5">5 estrelas</option>
-                    <option value="4">4 estrelas</option>
-                    <option value="3">3 estrelas</option>
-                    <option value="2">2 estrelas</option>
-                    <option value="1">1 estrela</option>
-                  </select>
-
-                  <input
-                    type="text"
-                    placeholder="Conte como foi o atendimento"
-                    value={formAvaliacoes[prestador.id]?.comentario || ""}
-                    onChange={(e) =>
-                      handleFormAvaliacao(prestador.id, "comentario", e.target.value)
-                    }
-                  />
-
-                  <button type="button" onClick={() => handleEnviarAvaliacao(prestador.id)}>
-                    📩 Enviar
-                  </button>
-                </div>
-
-                <div className="reviewList">
-                  {prestador.avaliacoesRecentes.length === 0 ? (
-                    <p className="emptyMini">Ainda nao existem comentarios.</p>
-                  ) : (
-                    prestador.avaliacoesRecentes.map((avaliacao) => (
-                      <div key={avaliacao.id} className="reviewItem">
-                        <strong>
-                          {avaliacao.usuario} - {avaliacao.nota}/5
-                        </strong>
-                        <p>{avaliacao.comentario}</p>
-                        <span>{formatarData(avaliacao.data)}</span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </article>
+            <PrestadorCard
+              key={prestador.id}
+              prestador={prestador}
+              index={index}
+              local={local}
+              formAvaliacao={formAvaliacoes[prestador.id]}
+              onToggleFavorito={handleToggleFavorito}
+              onRegistrarChamado={handleRegistrarChamado}
+              onFormAvaliacao={handleFormAvaliacao}
+              onEnviarAvaliacao={handleEnviarAvaliacao}
+              formatarData={formatarData}
+            />
           ))
         )}
       </div>

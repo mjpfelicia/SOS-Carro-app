@@ -226,6 +226,7 @@ export function isFavorito(prestadorId) {
 }
 
 export function registrarChamado(prestador) {
+  const prioridade = prestador.prioridade || "normal"
   const historicoPorUsuario = read(KEYS.chamadosPorUsuario, {})
   const userKey = getUserKey()
   const lista = historicoPorUsuario[userKey] || []
@@ -238,7 +239,8 @@ export function registrarChamado(prestador) {
     cidade: prestador.cidade,
     telefone: prestador.telefone,
     data: new Date().toISOString(),
-    status: "Solicitado"
+    status: "Solicitado",
+    prioridade
   }
 
   historicoPorUsuario[userKey] = [chamado, ...lista]

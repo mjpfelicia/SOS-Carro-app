@@ -8,6 +8,7 @@ import {
   removePrestador,
   updatePrestador
 } from "../services/storage"
+import HomeBackButton from "../components/HomeBackButton"
 import "./DashboardPages.css"
 
 export default function AdminPrestadores() {
@@ -72,9 +73,7 @@ export default function AdminPrestadores() {
 
         <div className="dashboardActions">
           <button onClick={() => navigate("/cadastro-prestador")}>Novo prestador</button>
-          <button className="homeBackButton" onClick={() => navigate("/")}>
-            🏠 Voltar para home
-          </button>
+          <HomeBackButton />
         </div>
       </div>
 

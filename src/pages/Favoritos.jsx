@@ -1,10 +1,9 @@
 import { useMemo } from "react"
-import { useNavigate } from "react-router-dom"
 import { getFavoritos, getPrestadores, getResumoAvaliacao } from "../services/storage"
+import HomeBackButton from "../components/HomeBackButton"
 import "./DashboardPages.css"
 
 export default function Favoritos() {
-  const navigate = useNavigate()
   const favoritos = getFavoritos()
   const prestadores = getPrestadores()
 
@@ -21,9 +20,7 @@ export default function Favoritos() {
           <p>Prestadores salvos para acesso rapido neste usuario.</p>
         </div>
         <div className="dashboardActions">
-          <button className="homeBackButton" onClick={() => navigate("/")}>
-            🏠 Voltar para home
-          </button>
+          <HomeBackButton />
         </div>
       </div>
 
