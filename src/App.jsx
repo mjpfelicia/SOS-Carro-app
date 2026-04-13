@@ -10,6 +10,7 @@ import Historico from "./pages/Historico.jsx"
 import AdminPrestadores from "./pages/AdminPrestadores.jsx"
 import Profile from "./pages/Profile.jsx"
 import Socorro from "./pages/Socorro/Socorro.jsx"
+import Pacotes from "./pages/Pacotes.jsx"
 import { getUsuarioAtual, isAdmin } from "./services/storage.js"
 
 function AdminRoute({ children }) {
@@ -40,6 +41,7 @@ function App() {
         <Route path="/favoritos" element={<Favoritos />} />
         <Route path="/historico" element={<Historico />} />
         <Route path="/socorro" element={<Socorro />} />
+        <Route path="/pacotes" element={<Pacotes />} />
         <Route
           path="/admin"
           element={

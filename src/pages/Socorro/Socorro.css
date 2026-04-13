@@ -299,6 +299,37 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+.socorroPacote {
+  width: min(1180px, 100%);
+  margin: 20px auto;
+}
+
+.pacoteStatus {
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(76, 175, 80, 0.2);
+}
+
+.pacoteAviso {
+  background: linear-gradient(135deg, #ff9800, #ffb74d);
+  color: white;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(255, 152, 0, 0.2);
+}
+
+.pacoteIcon {
+  font-size: 24px;
+}
+
 .socorroAjudaButton {
   min-width: 180px;
 }

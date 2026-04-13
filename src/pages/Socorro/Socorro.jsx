@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { getPrestadores, registrarChamado } from "../../services/storage"
+import { getPrestadores, registrarChamado, podeUsarChamado, registrarUsoChamado, getAssinaturaAtual, getPacotes } from "../../services/storage"
 import HomeBackButton from "../../components/HomeBackButton"
 import PrimaryActionButton from "../../components/PrimaryActionButton"
 import WhatsAppButton from "../../components/WhatsAppButton"
@@ -185,12 +185,21 @@ export default function Socorro() {
   function pedirAjuda() {
     if (!problemaSelecionado || !prestadorSelecionado) return
 
+    const podeUsar = podeUsarChamado()
+    if (!podeUsar) {
+      alert("Você não possui um pacote ativo ou excedeu o limite de chamados. Assine um pacote para continuar.")
+      return
+    }
+
     registrarChamado(prestadorSelecionado, {
       prioridade: problemaSelecionado.prioridade,
       problema: problemaSelecionado.titulo,
       detalhes: detalhes.trim() || null,
       localizacao
     })
+
+    registrarUsoChamado()
+
     const mensagem = montarMensagem(prestadorSelecionado)
 
     window.open(
@@ -199,6 +208,9 @@ export default function Socorro() {
       "noopener,noreferrer"
     )
   }
+
+  const assinatura = getAssinaturaAtual()
+  const pacote = assinatura ? getPacotes().find(p => p.id === assinatura.pacoteId) : null
 
   return (
     <div className="socorroPage">
@@ -212,6 +224,31 @@ export default function Socorro() {
 
         <HomeBackButton />
       </section>
+
+      {assinatura && assinatura.status === "ativo" && pacote && (
+        <section className="socorroPacote">
+          <div className="pacoteStatus">
+            <span className="pacoteIcon">📦</span>
+            <div>
+              <strong>Pacote {pacote.nome} ativo</strong>
+              <p>Chamados restantes: {pacote.maxChamados === -1 ? "Ilimitados" : pacote.maxChamados - assinatura.chamadosUsados}</p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {!assinatura || assinatura.status !== "ativo" ? (
+        <section className="socorroPacote">
+          <div className="pacoteAviso">
+            <span className="pacoteIcon">⚠️</span>
+            <div>
+              <strong>Sem pacote ativo</strong>
+              <p>Assine um pacote mensal para acessar os serviços de emergência com valores fixos.</p>
+              <a href="/pacotes" style={{ color: "#2196f3", textDecoration: "underline" }}>Ver pacotes</a>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="socorroPergunta">
         <div className="socorroPerguntaHeader">

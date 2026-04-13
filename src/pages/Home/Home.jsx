@@ -32,7 +32,8 @@ const TIPOS_SERVICO = [
 const LINKS_RAPIDOS = [
   { label: "❤️ Favoritos", rota: "/favoritos" },
   { label: "🧾 Histórico", rota: "/historico" },
-  { label: "🛠️ Painel", rota: "/admin" },
+  { label: "� Pacotes", rota: "/pacotes" },
+  { label: "�🛠️ Painel", rota: "/admin" },
   { label: "👤 Perfil", rota: "/perfil" }
 ]
 

@@ -5,7 +5,9 @@ import {
   getFavoritos,
   getUsuarioAtual,
   logoutUsuario,
-  updateUsuario
+  updateUsuario,
+  getAssinaturaAtual,
+  getPacotes
 } from "../services/storage"
 import HomeBackButton from "../components/HomeBackButton"
 import "./DashboardPages.css"
@@ -21,6 +23,8 @@ export default function Profile() {
   })
   const favoritos = getFavoritos()
   const chamados = getChamados()
+  const assinatura = getAssinaturaAtual()
+  const pacote = assinatura ? getPacotes().find(p => p.id === assinatura.pacoteId) : null
 
   function sair() {
     logoutUsuario()
@@ -122,6 +126,24 @@ export default function Profile() {
             </>
           ) : (
             <p>Nenhum usuario autenticado. O app esta em modo visitante.</p>
+          )}
+        </section>
+
+        <section className="dashboardCard">
+          <h2>Assinatura</h2>
+          {assinatura && assinatura.status === "ativo" && pacote ? (
+            <>
+              <p><strong>{pacote.nome}</strong></p>
+              <p>Status: Ativo</p>
+              <p>Válido até: {new Date(assinatura.dataFim).toLocaleDateString("pt-BR")}</p>
+              <p>Chamados usados: {assinatura.chamadosUsados}</p>
+              <p>Chamados restantes: {pacote.maxChamados === -1 ? "Ilimitados" : pacote.maxChamados - assinatura.chamadosUsados}</p>
+            </>
+          ) : (
+            <>
+              <p>Sem assinatura ativa</p>
+              <button onClick={() => navigate("/pacotes")} style={{ marginTop: "10px" }}>Ver Pacotes</button>
+            </>
           )}
         </section>
 
