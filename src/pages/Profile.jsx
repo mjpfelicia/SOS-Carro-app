@@ -1,22 +1,61 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   getChamados,
   getFavoritos,
   getUsuarioAtual,
-  logoutUsuario
+  logoutUsuario,
+  updateUsuario
 } from "../services/storage"
 import HomeBackButton from "../components/HomeBackButton"
 import "./DashboardPages.css"
 
 export default function Profile() {
   const navigate = useNavigate()
-  const usuario = getUsuarioAtual()
+  const [usuario, setUsuario] = useState(getUsuarioAtual())
+  const [editando, setEditando] = useState(false)
+  const [formData, setFormData] = useState({
+    nome: usuario?.nome || "",
+    email: usuario?.email || "",
+    telefone: usuario?.telefone || ""
+  })
   const favoritos = getFavoritos()
   const chamados = getChamados()
 
   function sair() {
     logoutUsuario()
     navigate("/")
+  }
+
+  function iniciarEdicao() {
+    setEditando(true)
+    setFormData({
+      nome: usuario?.nome || "",
+      email: usuario?.email || "",
+      telefone: usuario?.telefone || ""
+    })
+  }
+
+  function cancelarEdicao() {
+    setEditando(false)
+  }
+
+  function salvarEdicao() {
+    try {
+      const usuarioAtualizado = updateUsuario(formData)
+      setUsuario(usuarioAtualizado)
+      setEditando(false)
+    } catch (error) {
+      alert("Erro ao atualizar perfil: " + error.message)
+    }
+  }
+
+  function handleInputChange(e) {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   return (
@@ -29,6 +68,7 @@ export default function Profile() {
         <div className="dashboardActions">
           <HomeBackButton />
           {!usuario && <button onClick={() => navigate("/login")}>Entrar</button>}
+          {usuario && !editando && <button onClick={iniciarEdicao}>Editar</button>}
           {usuario && <button onClick={sair}>Sair</button>}
         </div>
       </div>
@@ -36,10 +76,48 @@ export default function Profile() {
       <div className="dashboardGrid">
         <section className="dashboardCard">
           <h2>Usuario atual</h2>
-          {usuario ? (
+          {editando ? (
+            <div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Nome:</label>
+                <input
+                  type="text"
+                  name="nome"
+                  value={formData.nome}
+                  onChange={handleInputChange}
+                  style={{ width: "100%", padding: "5px" }}
+                />
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Email:</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  style={{ width: "100%", padding: "5px" }}
+                />
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Telefone:</label>
+                <input
+                  type="tel"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleInputChange}
+                  style={{ width: "100%", padding: "5px" }}
+                />
+              </div>
+              <div>
+                <button onClick={salvarEdicao} style={{ marginRight: "10px" }}>Salvar</button>
+                <button onClick={cancelarEdicao}>Cancelar</button>
+              </div>
+            </div>
+          ) : usuario ? (
             <>
               <p>{usuario.nome}</p>
               <small>{usuario.email}</small>
+              {usuario.telefone && <small>Telefone: {usuario.telefone}</small>}
               <small>Perfil: {usuario.role === "admin" ? "Administrador" : "Cliente"}</small>
             </>
           ) : (

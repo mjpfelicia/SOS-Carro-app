@@ -15,16 +15,18 @@ function getPrioridadeLabel(prioridade) {
 }
 
 export default function Historico() {
-  const chamados = getChamados().slice().sort((a, b) => {
-    const prioridadeA = ORDEM_PRIORIDADE[a.prioridade] ?? ORDEM_PRIORIDADE.normal
-    const prioridadeB = ORDEM_PRIORIDADE[b.prioridade] ?? ORDEM_PRIORIDADE.normal
+  const chamados = getChamados()
+    .slice()
+    .sort((a, b) => {
+      const prioridadeA = ORDEM_PRIORIDADE[a.prioridade] ?? ORDEM_PRIORIDADE.normal
+      const prioridadeB = ORDEM_PRIORIDADE[b.prioridade] ?? ORDEM_PRIORIDADE.normal
 
-    if (prioridadeA !== prioridadeB) {
-      return prioridadeA - prioridadeB
-    }
+      if (prioridadeA !== prioridadeB) {
+        return prioridadeA - prioridadeB
+      }
 
-    return new Date(b.data).getTime() - new Date(a.data).getTime()
-  })
+      return new Date(b.data).getTime() - new Date(a.data).getTime()
+    })
 
   return (
     <div className="dashboardPage">
@@ -48,11 +50,14 @@ export default function Historico() {
             <section key={chamado.id} className="dashboardCard">
               <h2>{chamado.nomePrestador}</h2>
               <p>
-                {chamado.tipo} • {chamado.cidade}
+                {chamado.tipo} - {chamado.cidade}
               </p>
               <small>Telefone: {chamado.telefone}</small>
               <small>Status: {chamado.status}</small>
               <small>{getPrioridadeLabel(chamado.prioridade)}</small>
+              {chamado.problema && <small>Problema: {chamado.problema}</small>}
+              {chamado.detalhes && <small>Detalhes: {chamado.detalhes}</small>}
+              {chamado.localizacao && <small>Localizacao: {chamado.localizacao}</small>}
               <small>Solicitado em: {formatarData(chamado.data)}</small>
             </section>
           ))

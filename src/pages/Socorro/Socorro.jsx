@@ -185,9 +185,11 @@ export default function Socorro() {
   function pedirAjuda() {
     if (!problemaSelecionado || !prestadorSelecionado) return
 
-    registrarChamado({
-      ...prestadorSelecionado,
-      prioridade: problemaSelecionado.prioridade
+    registrarChamado(prestadorSelecionado, {
+      prioridade: problemaSelecionado.prioridade,
+      problema: problemaSelecionado.titulo,
+      detalhes: detalhes.trim() || null,
+      localizacao
     })
     const mensagem = montarMensagem(prestadorSelecionado)
 

@@ -8,6 +8,7 @@ export default function CadastroCliente() {
   const [form, setForm] = useState({
     nome: "",
     email: "",
+    telefone: "",
     senha: ""
   })
   const [erro, setErro] = useState("")
@@ -19,18 +20,14 @@ export default function CadastroCliente() {
   function handleSubmit(e) {
     e.preventDefault()
 
-    const usuarios = getUsuarios()
-    const emailJaExiste = usuarios.some((usuario) => usuario.email === form.email)
-
-    if (emailJaExiste) {
-      setErro("Ja existe um cadastro com esse email.")
-      return
+    try {
+      createUsuario(form)
+      setErro("")
+      alert("Cliente cadastrado com sucesso!")
+      navigate("/")
+    } catch (error) {
+      setErro(error.message)
     }
-
-    createUsuario(form)
-    setErro("")
-    alert("Cliente cadastrado com sucesso!")
-    navigate("/")
   }
 
   return (
@@ -53,6 +50,13 @@ export default function CadastroCliente() {
           value={form.email}
           onChange={handleChange}
           required
+        />
+
+        <input
+          id="telefone"
+          placeholder="Telefone (opcional)"
+          value={form.telefone}
+          onChange={handleChange}
         />
 
         <input

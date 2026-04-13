@@ -4,7 +4,9 @@ const KEYS = {
   usuarioAtual: "usuarioAtual",
   favoritosPorUsuario: "favoritosPorUsuario",
   chamadosPorUsuario: "chamadosPorUsuario",
-  avaliacoesPorPrestador: "avaliacoesPorPrestador"
+  avaliacoesPorPrestador: "avaliacoesPorPrestador",
+  pacotes: "pacotes",
+  assinaturasPorUsuario: "assinaturasPorUsuario"
 }
 
 const ADMIN_PADRAO = {
@@ -36,6 +38,36 @@ const PRESTADORES_INICIAIS = [
     telefone: "11991234567",
     tipo: "Borracheiro",
     cidade: "Santo André"
+  }
+]
+
+const PACOTES_INICIAIS = [
+  {
+    id: "pacote-basico",
+    nome: "Pacote Básico",
+    preco: 29.90,
+    periodo: "mensal",
+    descricao: "3 chamados de emergência por mês com valores fixos",
+    beneficios: [
+      "3 chamados de socorro gratuitos",
+      "Prioridade alta nos atendimentos",
+      "Desconto de 20% em serviços adicionais"
+    ],
+    maxChamados: 3
+  },
+  {
+    id: "pacote-premium",
+    nome: "Pacote Premium",
+    preco: 49.90,
+    periodo: "mensal",
+    descricao: "Chamados ilimitados com valores fixos e benefícios exclusivos",
+    beneficios: [
+      "Chamados ilimitados",
+      "Prioridade máxima",
+      "Desconto de 30% em todos os serviços",
+      "Suporte 24/7 por telefone"
+    ],
+    maxChamados: -1 // ilimitado
   }
 ]
 
@@ -153,10 +185,18 @@ export function getUsuarios() {
 
 export function createUsuario(data) {
   const usuarios = getUsuarios()
+
+  // Verificar se o email já está em uso
+  const emailExistente = usuarios.find((u) => u.email === data.email)
+  if (emailExistente) {
+    throw new Error("Este email já está cadastrado")
+  }
+
   const novoUsuario = {
     id: `usuario-${slugify(data.email)}-${Date.now()}`,
     nome: data.nome,
     email: data.email,
+    telefone: data.telefone || "",
     senha: data.senha,
     role: "cliente"
   }
@@ -198,6 +238,40 @@ export function logoutUsuario() {
   localStorage.removeItem(KEYS.usuarioAtual)
 }
 
+export function updateUsuario(data) {
+  const usuarios = getUsuarios()
+  const usuarioAtual = getUsuarioAtual()
+
+  if (!usuarioAtual) {
+    throw new Error("Nenhum usuário autenticado")
+  }
+
+  // Verificar se o email já está em uso por outro usuário
+  if (data.email && data.email !== usuarioAtual.email) {
+    const emailExistente = usuarios.find((u) => u.email === data.email && u.id !== usuarioAtual.id)
+    if (emailExistente) {
+      throw new Error("Este email já está em uso por outro usuário")
+    }
+  }
+
+  const index = usuarios.findIndex((u) => u.id === usuarioAtual.id)
+
+  if (index === -1) {
+    throw new Error("Usuário não encontrado")
+  }
+
+  const usuarioAtualizado = {
+    ...usuarios[index],
+    ...data
+  }
+
+  usuarios[index] = usuarioAtualizado
+  write(KEYS.usuarios, usuarios)
+  setUsuarioAtual(usuarioAtualizado)
+
+  return usuarioAtualizado
+}
+
 function getUserKey() {
   const usuario = getUsuarioAtual()
   return usuario?.id || "visitante"
@@ -225,8 +299,8 @@ export function isFavorito(prestadorId) {
   return getFavoritos().includes(prestadorId)
 }
 
-export function registrarChamado(prestador) {
-  const prioridade = prestador.prioridade || "normal"
+export function registrarChamado(prestador, contexto = {}) {
+  const prioridade = contexto.prioridade || prestador.prioridade || "normal"
   const historicoPorUsuario = read(KEYS.chamadosPorUsuario, {})
   const userKey = getUserKey()
   const lista = historicoPorUsuario[userKey] || []
@@ -240,7 +314,10 @@ export function registrarChamado(prestador) {
     telefone: prestador.telefone,
     data: new Date().toISOString(),
     status: "Solicitado",
-    prioridade
+    prioridade,
+    problema: contexto.problema || null,
+    detalhes: contexto.detalhes || null,
+    localizacao: contexto.localizacao || null
   }
 
   historicoPorUsuario[userKey] = [chamado, ...lista]
@@ -301,4 +378,74 @@ export function formatarData(dateString) {
 
 export function isAdmin(usuario = getUsuarioAtual()) {
   return usuario?.role === "admin"
+}
+
+export function getPacotes() {
+  return read(KEYS.pacotes, PACOTES_INICIAIS)
+}
+
+export function assinarPacote(pacoteId) {
+  const usuario = getUsuarioAtual()
+  if (!usuario) throw new Error("Usuário não autenticado")
+
+  const pacotes = getPacotes()
+  const pacote = pacotes.find(p => p.id === pacoteId)
+  if (!pacote) throw new Error("Pacote não encontrado")
+
+  const assinaturas = read(KEYS.assinaturasPorUsuario, {})
+  const userKey = usuario.id
+
+  const agora = new Date()
+  const assinatura = {
+    pacoteId,
+    dataInicio: agora.toISOString(),
+    dataFim: new Date(agora.getFullYear(), agora.getMonth() + 1, agora.getDate()).toISOString(),
+    status: "ativo",
+    chamadosUsados: 0
+  }
+
+  assinaturas[userKey] = assinatura
+  write(KEYS.assinaturasPorUsuario, assinaturas)
+  return assinatura
+}
+
+export function getAssinaturaAtual() {
+  const usuario = getUsuarioAtual()
+  if (!usuario) return null
+
+  const assinaturas = read(KEYS.assinaturasPorUsuario, {})
+  const assinatura = assinaturas[usuario.id]
+  if (!assinatura) return null
+
+  const agora = new Date()
+  const dataFim = new Date(assinatura.dataFim)
+  if (agora > dataFim) {
+    assinatura.status = "expirado"
+    write(KEYS.assinaturasPorUsuario, assinaturas)
+  }
+
+  return assinatura
+}
+
+export function podeUsarChamado() {
+  const assinatura = getAssinaturaAtual()
+  if (!assinatura || assinatura.status !== "ativo") return false
+
+  const pacote = getPacotes().find(p => p.id === assinatura.pacoteId)
+  if (!pacote) return false
+
+  if (pacote.maxChamados === -1) return true // ilimitado
+  return assinatura.chamadosUsados < pacote.maxChamados
+}
+
+export function registrarUsoChamado() {
+  const usuario = getUsuarioAtual()
+  if (!usuario) return
+
+  const assinaturas = read(KEYS.assinaturasPorUsuario, {})
+  const assinatura = assinaturas[usuario.id]
+  if (assinatura && assinatura.status === "ativo") {
+    assinatura.chamadosUsados += 1
+    write(KEYS.assinaturasPorUsuario, assinaturas)
+  }
 }
