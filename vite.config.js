@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/SOS-Carro-app/',
+  base: '/sos-carro-app/',
 })
