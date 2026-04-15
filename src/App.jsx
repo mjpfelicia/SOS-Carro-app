@@ -1,5 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import "leaflet/dist/leaflet.css"
 
 import Home from "./pages/Home/Home.jsx"
@@ -24,34 +23,9 @@ function AdminRoute({ children }) {
   return children
 }
 
-function RedirectHandler() {
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    // Only handle GitHub Pages redirects in production
-    if (!import.meta.env.PROD) return
-
-    // Handle GitHub Pages SPA redirects
-    const urlParams = new URLSearchParams(window.location.search)
-    const redirect = urlParams.get('/')
-
-    if (redirect) {
-      // Decode the path and navigate to it
-      const path = '/' + redirect.replace(/~and~/g, '&')
-      navigate(path, { replace: true })
-    }
-  }, [navigate])
-
-  return null
-}
-
 function App() {
-  // Only use basename in production (GitHub Pages)
-  const basename = import.meta.env.PROD ? '/sos-carro-app' : ''
-
   return (
-    <BrowserRouter basename={basename}>
-      <RedirectHandler />
+    <BrowserRouter basename="/sos-carro-app">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
