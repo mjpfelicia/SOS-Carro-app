@@ -25,7 +25,7 @@ function AdminRoute({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/sos-carro-app">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -52,6 +52,7 @@ function App() {
         />
         <Route path="/perfil" element={<Profile />} />
       </Routes>
+     
     </BrowserRouter>
   )
 }
