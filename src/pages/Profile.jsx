@@ -142,7 +142,7 @@ export default function Profile() {
           ) : (
             <>
               <p>Sem assinatura ativa</p>
-              <button onClick={() => navigate("/pacotes")} style={{ marginTop: "10px" }}>Ver Pacotes</button>
+              <button onClick={() => navigate("/pacotes")}  className="btn_dashboard">Ver Pacotes</button>
             </>
           )}
         </section>
