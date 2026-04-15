@@ -28,6 +28,9 @@ function RedirectHandler() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Only handle GitHub Pages redirects in production
+    if (!import.meta.env.PROD) return
+
     // Handle GitHub Pages SPA redirects
     const urlParams = new URLSearchParams(window.location.search)
     const redirect = urlParams.get('/')
@@ -43,8 +46,11 @@ function RedirectHandler() {
 }
 
 function App() {
+  // Only use basename in production (GitHub Pages)
+  const basename = import.meta.env.PROD ? '/sos-carro-app' : ''
+
   return (
-    <BrowserRouter basename="/sos-carro-app">
+    <BrowserRouter basename={basename}>
       <RedirectHandler />
       <Routes>
         <Route path="/" element={<Home />} />
