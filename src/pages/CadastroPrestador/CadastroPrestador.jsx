@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { createPrestador } from "../../services/storage"
+import { createPrestador } from "../../services/prestadoresService"
 import "./CadastroPrestador.css"
 
 const TIPOS = [
@@ -27,20 +27,25 @@ export default function CadastroPrestador() {
     setForm({ ...form, [e.target.id]: e.target.value })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    createPrestador(form)
 
-    alert("Prestador cadastrado com sucesso!")
+    try {
+      await createPrestador(form)
 
-    setForm({
-      nome: "",
-      telefone: "",
-      tipo: TIPOS[0],
-      cidade: ""
-    })
+      alert("Prestador cadastrado com sucesso!")
 
-    navigate("/admin")
+      setForm({
+        nome: "",
+        telefone: "",
+        tipo: TIPOS[0],
+        cidade: ""
+      })
+
+      navigate("/admin")
+    } catch (error) {
+      alert(error.message || "Nao foi possivel cadastrar o prestador.")
+    }
   }
 
   return (

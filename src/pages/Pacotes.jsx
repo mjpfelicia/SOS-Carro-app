@@ -1,21 +1,40 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { getPacotes, assinarPacote, getAssinaturaAtual } from "../services/storage"
 import HomeBackButton from "../components/HomeBackButton"
+import {
+  assinarPacote,
+  getAssinaturaAtual,
+  listPacotes
+} from "../services/assinaturasService"
 import "./DashboardPages.css"
 
 export default function Pacotes() {
   const navigate = useNavigate()
-  const pacotes = getPacotes()
-  const assinaturaAtual = getAssinaturaAtual()
+  const [pacotes, setPacotes] = useState([])
+  const [assinaturaAtual, setAssinaturaAtual] = useState(null)
   const [assinando, setAssinando] = useState(false)
 
-  function handleAssinar(pacoteId) {
+  useEffect(() => {
+    async function carregar() {
+      const [listaPacotes, assinatura] = await Promise.all([
+        listPacotes(),
+        getAssinaturaAtual()
+      ])
+
+      setPacotes(listaPacotes)
+      setAssinaturaAtual(assinatura)
+    }
+
+    carregar()
+  }, [])
+
+  async function handleAssinar(pacoteId) {
     if (assinando) return
 
     try {
       setAssinando(true)
-      assinarPacote(pacoteId)
+      const assinatura = await assinarPacote(pacoteId)
+      setAssinaturaAtual(assinatura)
       alert("Pacote assinado com sucesso!")
       navigate("/perfil")
     } catch (error) {

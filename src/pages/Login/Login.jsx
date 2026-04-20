@@ -1,27 +1,28 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { autenticarUsuario } from "../../services/storage"
+import { useAuth } from "../../providers/AuthProvider"
+import { signIn } from "../../services/authService"
 import "./Login.css"
 
 export default function Login() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const [erro, setErro] = useState("")
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
-    const usuario = autenticarUsuario(email, senha)
-
-    if (!usuario) {
-      setErro("Nao encontramos um usuario com esse email e senha.")
-      return
+    try {
+      const usuario = await signIn({ email, senha })
+      await refreshUser()
+      setErro("")
+      alert(`Bem-vindo, ${usuario.nome}!`)
+      navigate("/")
+    } catch (error) {
+      setErro(error.message || "Nao foi possivel entrar agora.")
     }
-
-    setErro("")
-    alert(`Bem-vindo, ${usuario.nome}!`)
-    navigate("/")
   }
 
   return (

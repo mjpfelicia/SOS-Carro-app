@@ -11,12 +11,16 @@ import AdminPrestadores from "./pages/AdminPrestadores.jsx"
 import Profile from "./pages/Profile.jsx"
 import Socorro from "./pages/Socorro/Socorro.jsx"
 import Pacotes from "./pages/Pacotes.jsx"
-import { getUsuarioAtual, isAdmin } from "./services/storage.js"
+import { useAuth } from "./providers/AuthProvider.jsx"
 
 function AdminRoute({ children }) {
-  const usuario = getUsuarioAtual()
+  const { user, loading } = useAuth()
 
-  if (!isAdmin(usuario)) {
+  if (loading) {
+    return null
+  }
+
+  if (user?.role !== "admin") {
     return <Navigate to="/" replace />
   }
 

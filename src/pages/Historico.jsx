@@ -1,5 +1,7 @@
-import { formatarData, getChamados } from "../services/storage"
+import { useEffect, useMemo, useState } from "react"
+import { formatarData } from "../services/storage"
 import HomeBackButton from "../components/HomeBackButton"
+import { listChamados } from "../services/chamadosService"
 import "./DashboardPages.css"
 
 const ORDEM_PRIORIDADE = {
@@ -15,18 +17,30 @@ function getPrioridadeLabel(prioridade) {
 }
 
 export default function Historico() {
-  const chamados = getChamados()
-    .slice()
-    .sort((a, b) => {
-      const prioridadeA = ORDEM_PRIORIDADE[a.prioridade] ?? ORDEM_PRIORIDADE.normal
-      const prioridadeB = ORDEM_PRIORIDADE[b.prioridade] ?? ORDEM_PRIORIDADE.normal
+  const [chamadosBase, setChamadosBase] = useState([])
 
-      if (prioridadeA !== prioridadeB) {
-        return prioridadeA - prioridadeB
-      }
+  useEffect(() => {
+    async function carregar() {
+      setChamadosBase(await listChamados())
+    }
 
-      return new Date(b.data).getTime() - new Date(a.data).getTime()
-    })
+    carregar()
+  }, [])
+
+  const chamados = useMemo(
+    () =>
+      chamadosBase.slice().sort((a, b) => {
+        const prioridadeA = ORDEM_PRIORIDADE[a.prioridade] ?? ORDEM_PRIORIDADE.normal
+        const prioridadeB = ORDEM_PRIORIDADE[b.prioridade] ?? ORDEM_PRIORIDADE.normal
+
+        if (prioridadeA !== prioridadeB) {
+          return prioridadeA - prioridadeB
+        }
+
+        return new Date(b.data).getTime() - new Date(a.data).getTime()
+      }),
+    [chamadosBase]
+  )
 
   return (
     <div className="dashboardPage">

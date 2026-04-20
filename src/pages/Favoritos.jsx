@@ -1,11 +1,45 @@
-import { useMemo } from "react"
-import { getFavoritos, getPrestadores, getResumoAvaliacao } from "../services/storage"
+import { useEffect, useMemo, useState } from "react"
 import HomeBackButton from "../components/HomeBackButton"
+import { listFavoritosIds } from "../services/favoritosService"
+import { listPrestadores } from "../services/prestadoresService"
+import {
+  getResumoAvaliacaoFromList,
+  listAvaliacoesByPrestadores
+} from "../services/avaliacoesService"
 import "./DashboardPages.css"
 
 export default function Favoritos() {
-  const favoritos = getFavoritos()
-  const prestadores = getPrestadores()
+  const [favoritos, setFavoritos] = useState([])
+  const [prestadores, setPrestadores] = useState([])
+  const [avaliacoesPorPrestador, setAvaliacoesPorPrestador] = useState({})
+
+  useEffect(() => {
+    async function carregar() {
+      const [favoritosIds, listaPrestadores] = await Promise.all([
+        listFavoritosIds(),
+        listPrestadores()
+      ])
+
+      setFavoritos(favoritosIds)
+      setPrestadores(listaPrestadores)
+    }
+
+    carregar()
+  }, [])
+
+  useEffect(() => {
+    async function carregarAvaliacoes() {
+      if (!prestadores.length) {
+        setAvaliacoesPorPrestador({})
+        return
+      }
+
+      const dados = await listAvaliacoesByPrestadores(prestadores.map((prestador) => prestador.id))
+      setAvaliacoesPorPrestador(dados)
+    }
+
+    carregarAvaliacoes()
+  }, [prestadores])
 
   const lista = useMemo(
     () => prestadores.filter((prestador) => favoritos.includes(prestador.id)),
@@ -31,7 +65,7 @@ export default function Favoritos() {
           </section>
         ) : (
           lista.map((prestador) => {
-            const resumo = getResumoAvaliacao(prestador.id)
+            const resumo = getResumoAvaliacaoFromList(avaliacoesPorPrestador[prestador.id] || [])
 
             return (
               <section key={prestador.id} className="dashboardCard">

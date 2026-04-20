@@ -3,38 +3,35 @@ import { useNavigate } from "react-router-dom"
 import EmergencyButton from "../../components/EmergencyButton"
 import Mapa from "../../components/Mapa/Mapa"
 import PrestadorCard from "../../components/PrestadorCard"
+import { useAuth } from "../../providers/AuthProvider"
+import { formatarData } from "../../services/storage"
+import { listPrestadores } from "../../services/prestadoresService"
+import { listFavoritosIds, toggleFavorito } from "../../services/favoritosService"
+import { createChamado, listChamados } from "../../services/chamadosService"
 import {
-  formatarData,
-  getAvaliacoes,
-  getChamados,
-  getFavoritos,
-  getPrestadores,
-  getResumoAvaliacao,
-  getUsuarioAtual,
-  isAdmin,
-  registrarAvaliacao,
-  registrarChamado,
-  toggleFavorito
-} from "../../services/storage"
+  createAvaliacao,
+  getResumoAvaliacaoFromList,
+  listAvaliacoesByPrestadores
+} from "../../services/avaliacoesService"
 import "./Home.css"
 
 const TIPOS_SERVICO = [
-  { nome: "Guincho", icone: "🚚" },
-  { nome: "Bateria", icone: "🔋" },
-  { nome: "Borracheiro", icone: "🛞" },
-  { nome: "Mecânico", icone: "🔧" },
-  { nome: "Auto Elétrica", icone: "⚡" },
-  { nome: "Chaveiro", icone: "🗝️" },
-  { nome: "Ar Condicionado", icone: "❄️" },
-  { nome: "Troca de Óleo", icone: "🛢️" }
+  { nome: "Guincho", icone: "GUI" },
+  { nome: "Bateria", icone: "BAT" },
+  { nome: "Borracheiro", icone: "BOR" },
+  { nome: "Mecanico", icone: "MEC" },
+  { nome: "Auto Eletrica", icone: "ELE" },
+  { nome: "Chaveiro", icone: "CHA" },
+  { nome: "Ar Condicionado", icone: "AR" },
+  { nome: "Troca de Oleo", icone: "OLE" }
 ]
 
 const LINKS_RAPIDOS = [
-  { label: "❤️ Favoritos", rota: "/favoritos" },
-  { label: "🧾 Histórico", rota: "/historico" },
-  { label: "� Pacotes", rota: "/pacotes" },
-  { label: "�🛠️ Painel", rota: "/admin" },
-  { label: "👤 Perfil", rota: "/perfil" }
+  { label: "Favoritos", rota: "/favoritos" },
+  { label: "Historico", rota: "/historico" },
+  { label: "Pacotes", rota: "/pacotes" },
+  { label: "Painel", rota: "/admin" },
+  { label: "Perfil", rota: "/perfil" }
 ]
 
 function normalizarTexto(value) {
@@ -42,6 +39,21 @@ function normalizarTexto(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+}
+
+function normalizarCategoria(value) {
+  const texto = normalizarTexto(String(value || "")).replace(/[^a-z]/g, "")
+
+  if (texto.includes("guin")) return "guincho"
+  if (texto.includes("bater")) return "bateria"
+  if (texto.includes("borr")) return "borracheiro"
+  if (texto.includes("mec")) return "mecanico"
+  if (texto.includes("ele")) return "autoeletrica"
+  if (texto.includes("chav")) return "chaveiro"
+  if (texto.includes("cond")) return "arcondicionado"
+  if (texto.includes("ole")) return "trocadeoleo"
+
+  return texto
 }
 
 function gerarOffset(seed, divisor) {
@@ -62,27 +74,98 @@ export default function Home() {
   const [prestadores, setPrestadores] = useState([])
   const [favoritos, setFavoritos] = useState([])
   const [historico, setHistorico] = useState([])
-  const [usuarioAtual, setUsuarioAtual] = useState(null)
   const [busca, setBusca] = useState("")
   const [local, setLocal] = useState("Sao Paulo - SP")
   const [coords, setCoords] = useState({
     lat: -23.5505,
     lng: -46.6333
   })
-  const [avaliacoes, setAvaliacoes] = useState({})
+  const [avaliacoesPorPrestador, setAvaliacoesPorPrestador] = useState({})
   const [formAvaliacoes, setFormAvaliacoes] = useState({})
-  const usuarioAdmin = isAdmin(usuarioAtual)
+  const { user: usuarioAtual, isAdminUser: usuarioAdmin } = useAuth()
 
-  function carregarDados() {
-    setPrestadores(getPrestadores())
-    setFavoritos(getFavoritos())
-    setHistorico(getChamados())
-    setUsuarioAtual(getUsuarioAtual())
+  async function carregarDados() {
+    const [listaPrestadores, favoritosIds, listaChamados] = await Promise.all([
+      listPrestadores(),
+      listFavoritosIds(),
+      listChamados()
+    ])
+
+    setPrestadores(listaPrestadores)
+    setFavoritos(favoritosIds)
+    setHistorico(listaChamados)
   }
 
   useEffect(() => {
-    carregarDados()
-  }, [])
+    let isMounted = true
+
+    const loadData = async () => {
+      try {
+        const [listaPrestadores, favoritosIds, listaChamados] = await Promise.all([
+          listPrestadores(),
+          listFavoritosIds(),
+          listChamados()
+        ])
+
+        if (isMounted) {
+          setPrestadores(listaPrestadores)
+          setFavoritos(favoritosIds)
+          setHistorico(listaChamados)
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar dados:", erro)
+      }
+    }
+
+    loadData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [usuarioAtual])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadData = async () => {
+      const [listaPrestadores, favoritosIds, listaChamados] = await Promise.all([
+        listPrestadores(),
+        listFavoritosIds(),
+        listChamados()
+      ])
+
+      if (isMounted) {
+        setPrestadores(listaPrestadores)
+        setFavoritos(favoritosIds)
+        setHistorico(listaChamados)
+      }
+    }
+
+    loadData()
+
+    return () => {
+      isMounted = false
+    }
+  }, [usuarioAtual?.id])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAvaliacoes = async () => {
+      const dados = await listAvaliacoesByPrestadores(prestadores.map((prestador) => prestador.id))
+      if (isMounted) {
+        setAvaliacoesPorPrestador(dados)
+      }
+    }
+
+    if (prestadores.length > 0) {
+      loadAvaliacoes()
+    }
+
+    return () => {
+      isMounted = false
+    }
+  }, [prestadores])
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -151,7 +234,8 @@ export default function Home() {
     let lista = prestadores.map((prestador, index) => {
       const lat = coords.lat + gerarOffset(prestador.id || index, 40)
       const lng = coords.lng + gerarOffset((prestador.id || index) + "lng", 50)
-      const resumo = getResumoAvaliacao(prestador.id)
+      const avaliacoes = avaliacoesPorPrestador[prestador.id] || []
+      const resumo = getResumoAvaliacaoFromList(avaliacoes)
       const favorito = favoritos.includes(prestador.id)
 
       return {
@@ -161,12 +245,12 @@ export default function Home() {
         distancia: calcularDistancia(coords.lat, coords.lng, lat, lng),
         favorito,
         resumoAvaliacao: resumo,
-        avaliacoesRecentes: getAvaliacoes(prestador.id).slice(0, 2)
+        avaliacoesRecentes: avaliacoes.slice(0, 2)
       }
     })
 
     if (filtro !== "Todos") {
-      lista = lista.filter((prestador) => normalizarTexto(prestador.tipo) === normalizarTexto(filtro))
+      lista = lista.filter((prestador) => normalizarCategoria(prestador.tipo) === normalizarCategoria(filtro))
     }
 
     if (termo) {
@@ -177,15 +261,19 @@ export default function Home() {
     }
 
     return lista.sort((a, b) => a.distancia - b.distancia)
-  }, [avaliacoes, busca, coords, favoritos, filtro, prestadores])
+  }, [avaliacoesPorPrestador, busca, coords, favoritos, filtro, prestadores])
 
   function selecionar(tipo) {
     setFiltro(filtro === tipo ? "Todos" : tipo)
   }
 
-  function handleToggleFavorito(prestadorId) {
-    const atualizados = toggleFavorito(prestadorId)
-    setFavoritos(atualizados)
+  async function handleToggleFavorito(prestadorId) {
+    try {
+      const atualizados = await toggleFavorito(prestadorId)
+      setFavoritos(atualizados)
+    } catch (error) {
+      alert(error.message || "Nao foi possivel atualizar os favoritos.")
+    }
   }
 
   function abrirWhatsapp(prestador, mensagem) {
@@ -196,10 +284,14 @@ export default function Home() {
     )
   }
 
-  function handleRegistrarChamado(prestador, mensagem = null) {
-    registrarChamado(prestador)
-    setHistorico(getChamados())
-    abrirWhatsapp(prestador, mensagem || `Ola, preciso de ${prestador.tipo} em ${local}.`)
+  async function handleRegistrarChamado(prestador, mensagem = null) {
+    try {
+      await createChamado(prestador)
+      setHistorico(await listChamados())
+      abrirWhatsapp(prestador, mensagem || `Ola, preciso de ${prestador.tipo} em ${local}.`)
+    } catch (error) {
+      alert(error.message || "Nao foi possivel registrar o chamado.")
+    }
   }
 
   function handleFormAvaliacao(prestadorId, campo, valor) {
@@ -213,7 +305,7 @@ export default function Home() {
     }))
   }
 
-  function handleEnviarAvaliacao(prestadorId) {
+  async function handleEnviarAvaliacao(prestadorId) {
     const form = formAvaliacoes[prestadorId]
 
     if (!form?.comentario?.trim()) {
@@ -221,13 +313,20 @@ export default function Home() {
       return
     }
 
-    registrarAvaliacao(prestadorId, form)
-    setAvaliacoes((current) => ({ ...current, [prestadorId]: Date.now() }))
-    setFormAvaliacoes((current) => ({
-      ...current,
-      [prestadorId]: { nota: "5", comentario: "" }
-    }))
-    alert("Avaliacao registrada com sucesso!")
+    try {
+      const listaAtualizada = await createAvaliacao(prestadorId, form)
+      setAvaliacoesPorPrestador((current) => ({
+        ...current,
+        [prestadorId]: listaAtualizada
+      }))
+      setFormAvaliacoes((current) => ({
+        ...current,
+        [prestadorId]: { nota: "5", comentario: "" }
+      }))
+      alert("Avaliacao registrada com sucesso!")
+    } catch (error) {
+      alert(error.message || "Nao foi possivel registrar a avaliacao.")
+    }
   }
 
   return (
@@ -235,7 +334,7 @@ export default function Home() {
       <div className="header">
         <div className="headerContent">
           <div className="logo">
-            <span className="logoIcon">🚗</span>
+            <span className="logoIcon">SOS</span>
             <span>
               <span className="sos">SOS</span> Carro
             </span>
@@ -243,11 +342,11 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="location">📍 Local atual: {local}</div>
+      <div className="location">Local atual: {local}</div>
 
       <div className="welcomePanel">
         <div>
-          <strong>{usuarioAtual ? `👋 Ola, ${usuarioAtual.nome}` : "👀 Modo visitante"}</strong>
+          <strong>{usuarioAtual ? `Ola, ${usuarioAtual.nome}` : "Modo visitante"}</strong>
           <p>
             {usuarioAtual
               ? "Seus favoritos, historico e avaliacoes ficam salvos neste navegador."
@@ -256,8 +355,8 @@ export default function Home() {
         </div>
 
         <div className="welcomeStats">
-          <span>❤️ {favoritos.length} favoritos</span>
-          <span>🧾 {historico.length} chamados</span>
+          <span>{favoritos.length} favoritos</span>
+          <span>{historico.length} chamados</span>
         </div>
       </div>
 
@@ -276,12 +375,12 @@ export default function Home() {
           onChange={(e) => setBusca(e.target.value)}
         />
 
-        <button onClick={buscarLocal}>🔎 Buscar</button>
+        <button onClick={buscarLocal}>Buscar</button>
       </div>
 
       <EmergencyButton />
 
-      <h3 className="sectionTitle">⚡ Servicos Rapidos</h3>
+      <h3 className="sectionTitle">Servicos Rapidos</h3>
 
       <div className="services">
         {TIPOS_SERVICO.map((tipo) => (
@@ -296,7 +395,7 @@ export default function Home() {
         ))}
       </div>
 
-      <h3 className="sectionTitle">📍 Profissionais Proximos</h3>
+      <h3 className="sectionTitle">Profissionais Proximos</h3>
 
       <div className="professionalsGrid">
         {prestadoresComContexto.length === 0 ? (
@@ -327,24 +426,24 @@ export default function Home() {
         <div className="popupMenu">
           {usuarioAdmin && (
             <>
-              <button onClick={() => navigate("/cadastro-prestador")}>➕ Cadastrar prestador</button>
-              <button onClick={() => navigate("/admin")}>🛠️ Painel administrativo</button>
+              <button onClick={() => navigate("/cadastro-prestador")}>Cadastrar prestador</button>
+              <button onClick={() => navigate("/admin")}>Painel administrativo</button>
             </>
           )}
-          {!usuarioAdmin && <button onClick={() => navigate("/perfil")}>👤 Ver perfil</button>}
+          {!usuarioAdmin && <button onClick={() => navigate("/perfil")}>Ver perfil</button>}
         </div>
       )}
 
       <div className="bottomMenu">
-        <span onClick={() => navigate("/")}>🏠 Inicio</span>
-        <span onClick={() => navigate("/favoritos")}>❤️ Favoritos</span>
+        <span onClick={() => navigate("/")}>Inicio</span>
+        <span onClick={() => navigate("/favoritos")}>Favoritos</span>
 
         <span className="addButton" onClick={() => setOpenMenu(!openMenu)}>
           +
         </span>
 
-        <span onClick={() => navigate("/historico")}>🧾 Chamados</span>
-        <span onClick={() => navigate("/perfil")}>👤 Perfil</span>
+        <span onClick={() => navigate("/historico")}>Chamados</span>
+        <span onClick={() => navigate("/perfil")}>Perfil</span>
       </div>
     </div>
   )

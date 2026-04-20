@@ -1,34 +1,41 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { getResumoAvaliacao } from "../services/storage"
+import HomeBackButton from "../components/HomeBackButton"
+import { useAuth } from "../providers/AuthProvider"
 import {
-  getPrestadores,
-  getResumoAvaliacao,
-  getUsuarioAtual,
-  isAdmin,
+  listPrestadores,
   removePrestador,
   updatePrestador
-} from "../services/storage"
-import HomeBackButton from "../components/HomeBackButton"
+} from "../services/prestadoresService"
 import "./DashboardPages.css"
 
 export default function AdminPrestadores() {
   const navigate = useNavigate()
   const [prestadores, setPrestadores] = useState([])
   const [edicao, setEdicao] = useState({})
-  const usuario = getUsuarioAtual()
+  const { isAdminUser, loading } = useAuth()
 
-  function carregar() {
-    setPrestadores(getPrestadores())
+  async function carregar() {
+    try {
+      setPrestadores(await listPrestadores())
+    } catch {
+      setPrestadores([])
+    }
   }
 
   useEffect(() => {
-    if (!isAdmin(usuario)) {
+    if (loading) {
+      return
+    }
+
+    if (!isAdminUser) {
       navigate("/", { replace: true })
       return
     }
 
     carregar()
-  }, [navigate, usuario])
+  }, [isAdminUser, loading, navigate])
 
   function iniciarEdicao(prestador) {
     setEdicao((current) => ({
@@ -47,9 +54,9 @@ export default function AdminPrestadores() {
     }))
   }
 
-  function salvar(prestadorId) {
-    updatePrestador(prestadorId, edicao[prestadorId])
-    carregar()
+  async function salvar(prestadorId) {
+    await updatePrestador(prestadorId, edicao[prestadorId])
+    await carregar()
     setEdicao((current) => {
       const next = { ...current }
       delete next[prestadorId]
@@ -57,9 +64,9 @@ export default function AdminPrestadores() {
     })
   }
 
-  function excluir(prestadorId) {
-    removePrestador(prestadorId)
-    carregar()
+  async function excluir(prestadorId) {
+    await removePrestador(prestadorId)
+    await carregar()
   }
 
   return (

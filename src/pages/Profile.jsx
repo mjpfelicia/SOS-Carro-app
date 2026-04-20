@@ -1,33 +1,61 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  getChamados,
-  getFavoritos,
-  getUsuarioAtual,
-  logoutUsuario,
-  updateUsuario,
-  getAssinaturaAtual,
-  getPacotes
-} from "../services/storage"
 import HomeBackButton from "../components/HomeBackButton"
+import { useAuth } from "../providers/AuthProvider"
+import { signOut } from "../services/authService"
+import { updateCurrentProfile } from "../services/profileService"
+import { listFavoritosIds } from "../services/favoritosService"
+import { listChamados } from "../services/chamadosService"
+import { getAssinaturaAtual, listPacotes } from "../services/assinaturasService"
 import "./DashboardPages.css"
 
 export default function Profile() {
   const navigate = useNavigate()
-  const [usuario, setUsuario] = useState(getUsuarioAtual())
+  const { user, refreshUser } = useAuth()
+  const [usuario, setUsuario] = useState(user)
   const [editando, setEditando] = useState(false)
+  const [favoritos, setFavoritos] = useState([])
+  const [chamados, setChamados] = useState([])
+  const [assinatura, setAssinatura] = useState(null)
+  const [pacotes, setPacotes] = useState([])
   const [formData, setFormData] = useState({
-    nome: usuario?.nome || "",
-    email: usuario?.email || "",
-    telefone: usuario?.telefone || ""
+    nome: user?.nome || "",
+    email: user?.email || "",
+    telefone: user?.telefone || ""
   })
-  const favoritos = getFavoritos()
-  const chamados = getChamados()
-  const assinatura = getAssinaturaAtual()
-  const pacote = assinatura ? getPacotes().find(p => p.id === assinatura.pacoteId) : null
 
-  function sair() {
-    logoutUsuario()
+  const pacote = assinatura ? pacotes.find((item) => item.id === assinatura.pacoteId) : null
+
+  useEffect(() => {
+    setUsuario(user)
+    setFormData({
+      nome: user?.nome || "",
+      email: user?.email || "",
+      telefone: user?.telefone || ""
+    })
+  }, [user])
+
+  useEffect(() => {
+    async function carregar() {
+      const [favoritosIds, listaChamados, assinaturaAtual, listaPacotes] = await Promise.all([
+        listFavoritosIds(),
+        listChamados(),
+        getAssinaturaAtual(),
+        listPacotes()
+      ])
+
+      setFavoritos(favoritosIds)
+      setChamados(listaChamados)
+      setAssinatura(assinaturaAtual)
+      setPacotes(listaPacotes)
+    }
+
+    carregar()
+  }, [user?.id])
+
+  async function sair() {
+    await signOut()
+    await refreshUser()
     navigate("/")
   }
 
@@ -44,9 +72,10 @@ export default function Profile() {
     setEditando(false)
   }
 
-  function salvarEdicao() {
+  async function salvarEdicao() {
     try {
-      const usuarioAtualizado = updateUsuario(formData)
+      const usuarioAtualizado = await updateCurrentProfile(formData)
+      await refreshUser()
       setUsuario(usuarioAtualizado)
       setEditando(false)
     } catch (error) {
@@ -56,7 +85,7 @@ export default function Profile() {
 
   function handleInputChange(e) {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }))
@@ -135,14 +164,14 @@ export default function Profile() {
             <>
               <p><strong>{pacote.nome}</strong></p>
               <p>Status: Ativo</p>
-              <p>Válido até: {new Date(assinatura.dataFim).toLocaleDateString("pt-BR")}</p>
+              <p>Valido ate: {new Date(assinatura.dataFim).toLocaleDateString("pt-BR")}</p>
               <p>Chamados usados: {assinatura.chamadosUsados}</p>
               <p>Chamados restantes: {pacote.maxChamados === -1 ? "Ilimitados" : pacote.maxChamados - assinatura.chamadosUsados}</p>
             </>
           ) : (
             <>
               <p>Sem assinatura ativa</p>
-              <button onClick={() => navigate("/pacotes")}  className="btn_dashboard">Ver Pacotes</button>
+              <button onClick={() => navigate("/pacotes")} className="btn_dashboard">Ver Pacotes</button>
             </>
           )}
         </section>

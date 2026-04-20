@@ -1,10 +1,12 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { createUsuario, getUsuarios } from "../../services/storage"
+import { useAuth } from "../../providers/AuthProvider"
+import { signUp } from "../../services/authService"
 import "./CadastroCliente.css"
 
 export default function CadastroCliente() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -17,13 +19,18 @@ export default function CadastroCliente() {
     setForm({ ...form, [e.target.id]: e.target.value })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
     try {
-      createUsuario(form)
+      const resultado = await signUp(form)
+      await refreshUser()
       setErro("")
-      alert("Cliente cadastrado com sucesso!")
+      alert(
+        resultado?.requerConfirmacaoEmail
+          ? "Cadastro realizado. Confirme seu email para concluir o acesso."
+          : "Cliente cadastrado com sucesso!"
+      )
       navigate("/")
     } catch (error) {
       setErro(error.message)
